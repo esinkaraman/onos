@@ -24,6 +24,7 @@
 #include "include/actions.p4"
 #include "include/port_counters.p4"
 #include "include/port_meters.p4"
+#include "include/registers.p4"
 #include "include/checksums.p4"
 #include "include/packet_io.p4"
 #include "include/table0.p4"
@@ -41,6 +42,7 @@ control ingress(inout headers_t hdr,
     apply {
         port_counters_ingress.apply(hdr, standard_metadata);
         port_meters_ingress.apply(hdr, standard_metadata);
+        registers_ingress.apply(hdr, standard_metadata);
         packetio_ingress.apply(hdr, standard_metadata);
         table0_control.apply(hdr, local_metadata, standard_metadata);
         host_meter_control.apply(hdr, local_metadata, standard_metadata);

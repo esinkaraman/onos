@@ -55,6 +55,13 @@ header ipv4_t {
 }
 const bit<8> IPV4_MIN_HEAD_LEN = 20;
 
+header ids_t {
+    bit<8>  type;
+    bit<32> reg_index;
+    bit<32> cnt_n;
+    bit<32> cnt_abn;
+}
+
 header tcp_t {
     bit<16> src_port;
     bit<16> dst_port;

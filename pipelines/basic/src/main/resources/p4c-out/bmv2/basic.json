@@ -6,14 +6,36 @@
       "fields" : [
         ["tmp", 32, false],
         ["tmp_0", 32, false],
-        ["port_meters_ingress_ingress_color", 8, false],
-        ["host_meter_control_meter_tag", 8, false],
         ["tmp_1", 32, false],
         ["tmp_2", 32, false],
+        ["tmp_3", 32, false],
+        ["tmp_4", 32, false],
+        ["tmp_5", 32, false],
+        ["tmp_6", 32, false],
+        ["tmp_7", 32, false],
+        ["tmp_8", 32, false],
+        ["tmp_9", 32, false],
+        ["tmp_10", 32, false],
+        ["tmp_11", 8, false],
+        ["tmp_12", 16, false],
+        ["tmp_13", 16, false],
+        ["tmp_14", 32, false],
+        ["tmp_15", 32, false],
+        ["tmp_16", 8, false],
+        ["tmp_17", 16, false],
+        ["tmp_18", 16, false],
+        ["port_meters_ingress_ingress_color", 8, false],
+        ["registers_ingress_flow_hash", 32, false],
+        ["registers_ingress_flow_hash_0", 32, false],
+        ["registers_ingress_p_count", 32, false],
+        ["registers_ingress_p_bytes", 32, false],
+        ["host_meter_control_meter_tag", 8, false],
+        ["tmp_19", 32, false],
+        ["tmp_20", 32, false],
         ["port_meters_egress_egress_color", 8, false],
-        ["local_metadata_t.l4_src_port", 16, false],
-        ["local_metadata_t.l4_dst_port", 16, false],
-        ["local_metadata_t.next_hop_id", 16, false]
+        ["userMetadata.l4_src_port", 16, false],
+        ["userMetadata.l4_dst_port", 16, false],
+        ["userMetadata.next_hop_id", 16, false]
       ]
     },
     {
@@ -23,10 +45,7 @@
         ["ingress_port", 9, false],
         ["egress_spec", 9, false],
         ["egress_port", 9, false],
-        ["clone_spec", 32, false],
         ["instance_type", 32, false],
-        ["drop", 1, false],
-        ["recirculate_port", 16, false],
         ["packet_length", 32, false],
         ["enq_timestamp", 32, false],
         ["enq_qdepth", 19, false],
@@ -34,15 +53,12 @@
         ["deq_qdepth", 19, false],
         ["ingress_global_timestamp", 48, false],
         ["egress_global_timestamp", 48, false],
-        ["lf_field_list", 32, false],
         ["mcast_grp", 16, false],
-        ["resubmit_flag", 32, false],
         ["egress_rid", 16, false],
-        ["recirculate_flag", 32, false],
         ["checksum_error", 1, false],
         ["parser_error", 32, false],
         ["priority", 3, false],
-        ["_padding_0", 2, false]
+        ["_padding_0", 3, false]
       ]
     },
     {
@@ -115,6 +131,16 @@
         ["length_", 16, false],
         ["checksum", 16, false]
       ]
+    },
+    {
+      "name" : "ids_t",
+      "id" : 8,
+      "fields" : [
+        ["type", 8, false],
+        ["reg_index", 32, false],
+        ["cnt_n", 32, false],
+        ["cnt_abn", 32, false]
+      ]
     }
   ],
   "headers" : [
@@ -173,6 +199,13 @@
       "header_type" : "udp_t",
       "metadata" : false,
       "pi_omit" : true
+    },
+    {
+      "name" : "ids",
+      "id" : 8,
+      "header_type" : "ids_t",
+      "metadata" : false,
+      "pi_omit" : true
     }
   ],
   "header_stacks" : [],
@@ -208,7 +241,8 @@
               "next_state" : "parse_packet_out"
             },
             {
-              "value" : "default",
+              "type" : "default",
+              "value" : null,
               "mask" : null,
               "next_state" : "parse_ethernet"
             }
@@ -236,7 +270,8 @@
           ],
           "transitions" : [
             {
-              "value" : "default",
+              "type" : "default",
+              "value" : null,
               "mask" : null,
               "next_state" : "parse_ethernet"
             }
@@ -265,7 +300,14 @@
               "next_state" : "parse_ipv4"
             },
             {
-              "value" : "default",
+              "type" : "hexstr",
+              "value" : "0x1742",
+              "mask" : null,
+              "next_state" : "parse_ids"
+            },
+            {
+              "type" : "default",
+              "value" : null,
               "mask" : null,
               "next_state" : null
             }
@@ -305,7 +347,8 @@
               "next_state" : "parse_udp"
             },
             {
-              "value" : "default",
+              "type" : "default",
+              "value" : null,
               "mask" : null,
               "next_state" : null
             }
@@ -318,8 +361,32 @@
           ]
         },
         {
-          "name" : "parse_tcp",
+          "name" : "parse_ids",
           "id" : 4,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "ids"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "default",
+              "value" : null,
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
+        },
+        {
+          "name" : "parse_tcp",
+          "id" : 5,
           "parser_ops" : [
             {
               "parameters" : [
@@ -334,7 +401,7 @@
               "parameters" : [
                 {
                   "type" : "field",
-                  "value" : ["scalars", "local_metadata_t.l4_src_port"]
+                  "value" : ["scalars", "userMetadata.l4_src_port"]
                 },
                 {
                   "type" : "field",
@@ -347,7 +414,7 @@
               "parameters" : [
                 {
                   "type" : "field",
-                  "value" : ["scalars", "local_metadata_t.l4_dst_port"]
+                  "value" : ["scalars", "userMetadata.l4_dst_port"]
                 },
                 {
                   "type" : "field",
@@ -359,7 +426,8 @@
           ],
           "transitions" : [
             {
-              "value" : "default",
+              "type" : "default",
+              "value" : null,
               "mask" : null,
               "next_state" : null
             }
@@ -368,7 +436,7 @@
         },
         {
           "name" : "parse_udp",
-          "id" : 5,
+          "id" : 6,
           "parser_ops" : [
             {
               "parameters" : [
@@ -383,7 +451,7 @@
               "parameters" : [
                 {
                   "type" : "field",
-                  "value" : ["scalars", "local_metadata_t.l4_src_port"]
+                  "value" : ["scalars", "userMetadata.l4_src_port"]
                 },
                 {
                   "type" : "field",
@@ -396,7 +464,7 @@
               "parameters" : [
                 {
                   "type" : "field",
-                  "value" : ["scalars", "local_metadata_t.l4_dst_port"]
+                  "value" : ["scalars", "userMetadata.l4_dst_port"]
                 },
                 {
                   "type" : "field",
@@ -408,7 +476,8 @@
           ],
           "transitions" : [
             {
-              "value" : "default",
+              "type" : "default",
+              "value" : null,
               "mask" : null,
               "next_state" : null
             }
@@ -425,11 +494,12 @@
       "id" : 0,
       "source_info" : {
         "filename" : "include/parsers.p4",
-        "line" : 72,
+        "line" : 78,
         "column" : 8,
         "source_fragment" : "deparser"
       },
-      "order" : ["packet_in", "ethernet", "ipv4", "tcp", "udp"]
+      "order" : ["packet_in", "ethernet", "ipv4", "tcp", "udp", "ids"],
+      "primitives" : []
     }
   ],
   "meter_arrays" : [
@@ -528,11 +598,102 @@
       "is_direct" : false
     }
   ],
-  "register_arrays" : [],
+  "register_arrays" : [
+    {
+      "name" : "ingress.registers_ingress.c",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "include/registers.p4",
+        "line" : 26,
+        "column" : 25,
+        "source_fragment" : "c"
+      },
+      "size" : 2,
+      "bitwidth" : 32
+    },
+    {
+      "name" : "ingress.registers_ingress.pc",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "include/registers.p4",
+        "line" : 28,
+        "column" : 27,
+        "source_fragment" : "pc"
+      },
+      "size" : 128,
+      "bitwidth" : 32
+    },
+    {
+      "name" : "ingress.registers_ingress.bc",
+      "id" : 2,
+      "source_info" : {
+        "filename" : "include/registers.p4",
+        "line" : 29,
+        "column" : 27,
+        "source_fragment" : "bc"
+      },
+      "size" : 128,
+      "bitwidth" : 32
+    }
+  ],
   "calculations" : [
     {
       "name" : "calc",
       "id" : 0,
+      "algo" : "crc32",
+      "input" : [
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_9"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_10"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_11"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_12"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_13"]
+        }
+      ]
+    },
+    {
+      "name" : "calc_0",
+      "id" : 1,
+      "algo" : "crc32",
+      "input" : [
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_14"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_15"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_16"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_17"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_18"]
+        }
+      ]
+    },
+    {
+      "name" : "calc_1",
+      "id" : 2,
       "source_info" : {
         "filename" : "include/checksums.p4",
         "line" : 32,
@@ -621,7 +782,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "local_metadata_t.next_hop_id"]
+              "value" : ["scalars", "userMetadata.next_hop_id"]
             },
             {
               "type" : "runtime_data",
@@ -656,7 +817,7 @@
           ],
           "source_info" : {
             "filename" : "include/defines.p4",
-            "line" : 43,
+            "line" : 44,
             "column" : 24,
             "source_fragment" : "255; ..."
           }
@@ -754,7 +915,7 @@
       ]
     },
     {
-      "name" : "act",
+      "name" : "port_meters29",
       "id" : 8,
       "runtime_data" : [],
       "primitives" : [
@@ -776,7 +937,7 @@
       ]
     },
     {
-      "name" : "act_0",
+      "name" : "port_counters29",
       "id" : 9,
       "runtime_data" : [],
       "primitives" : [
@@ -889,8 +1050,800 @@
       ]
     },
     {
-      "name" : "act_1",
+      "name" : "registers37",
       "id" : 10,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "ingress.registers_ingress.c"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x00000000"
+            },
+            {
+              "type" : "field",
+              "value" : ["ids", "cnt_n"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 37,
+            "column" : 12,
+            "source_fragment" : "c.write(0, (bit<32>)hdr.ids.cnt_n)"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "ingress.registers_ingress.c"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x00000001"
+            },
+            {
+              "type" : "field",
+              "value" : ["ids", "cnt_abn"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 38,
+            "column" : 12,
+            "source_fragment" : "c.write(1, (bit<32>)hdr.ids.cnt_abn)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "registers62",
+      "id" : 11,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_1"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "^",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash"]
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash_0"]
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0000007f"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 62,
+            "column" : 25,
+            "source_fragment" : "reg_index_common"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "ingress.registers_ingress.pc"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_1"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x00000001"
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 62,
+            "column" : 16,
+            "source_fragment" : "pc.write(reg_index_common, (bit<32>)0x1)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_2"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "^",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash"]
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash_0"]
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0000007f"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 63,
+            "column" : 25,
+            "source_fragment" : "reg_index_common"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "ingress.registers_ingress.bc"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_2"]
+            },
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "packet_length"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 63,
+            "column" : 16,
+            "source_fragment" : "bc.write(reg_index_common, standard_metadata.packet_length)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "registers70",
+      "id" : 12,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_3"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "^",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash"]
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash_0"]
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0000007f"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 70,
+            "column" : 33,
+            "source_fragment" : "reg_index_common"
+          }
+        },
+        {
+          "op" : "register_read",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "registers_ingress_p_count"]
+            },
+            {
+              "type" : "register_array",
+              "value" : "ingress.registers_ingress.pc"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_3"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 70,
+            "column" : 16,
+            "source_fragment" : "pc.read(p_count, reg_index_common)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_4"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "^",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash"]
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash_0"]
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0000007f"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 71,
+            "column" : 25,
+            "source_fragment" : "reg_index_common"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_5"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_p_count"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x00000001"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 71,
+            "column" : 43,
+            "source_fragment" : "p_count + 1"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "ingress.registers_ingress.pc"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_4"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_5"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 71,
+            "column" : 16,
+            "source_fragment" : "pc.write(reg_index_common, p_count + 1)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_6"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "^",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash"]
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash_0"]
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0000007f"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 73,
+            "column" : 33,
+            "source_fragment" : "reg_index_common"
+          }
+        },
+        {
+          "op" : "register_read",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "registers_ingress_p_bytes"]
+            },
+            {
+              "type" : "register_array",
+              "value" : "ingress.registers_ingress.bc"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_6"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 73,
+            "column" : 16,
+            "source_fragment" : "bc.read(p_bytes, reg_index_common)"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_7"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "^",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash"]
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_flow_hash_0"]
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x0000007f"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 74,
+            "column" : 25,
+            "source_fragment" : "reg_index_common"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_8"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "registers_ingress_p_bytes"]
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["standard_metadata", "packet_length"]
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 74,
+            "column" : 43,
+            "source_fragment" : "p_bytes + standard_metadata.packet_length"
+          }
+        },
+        {
+          "op" : "register_write",
+          "parameters" : [
+            {
+              "type" : "register_array",
+              "value" : "ingress.registers_ingress.bc"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_7"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_8"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 74,
+            "column" : 16,
+            "source_fragment" : "bc.write(reg_index_common, p_bytes + standard_metadata.packet_length)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "registers44",
+      "id" : 13,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_9"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "src_addr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 46,
+            "column" : 18,
+            "source_fragment" : "hdr.ipv4.src_addr"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_10"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "dst_addr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 46,
+            "column" : 37,
+            "source_fragment" : "hdr.ipv4.dst_addr"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_11"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "protocol"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 47,
+            "column" : 16,
+            "source_fragment" : "hdr.ipv4.protocol"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_12"]
+            },
+            {
+              "type" : "field",
+              "value" : ["tcp", "src_port"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 47,
+            "column" : 35,
+            "source_fragment" : "hdr.tcp.src_port"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_13"]
+            },
+            {
+              "type" : "field",
+              "value" : ["tcp", "dst_port"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 47,
+            "column" : 53,
+            "source_fragment" : "hdr.tcp.dst_port"
+          }
+        },
+        {
+          "op" : "modify_field_with_hash_based_offset",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "registers_ingress_flow_hash"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0000"
+            },
+            {
+              "type" : "calculation",
+              "value" : "calc"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x03ff"
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 44,
+            "column" : 12,
+            "source_fragment" : "hash(flow_hash_1, HashAlgorithm.crc32, ..."
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_14"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "dst_addr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 52,
+            "column" : 18,
+            "source_fragment" : "hdr.ipv4.dst_addr"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_15"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "src_addr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 52,
+            "column" : 37,
+            "source_fragment" : "hdr.ipv4.src_addr"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_16"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ipv4", "protocol"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 53,
+            "column" : 16,
+            "source_fragment" : "hdr.ipv4.protocol"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_17"]
+            },
+            {
+              "type" : "field",
+              "value" : ["tcp", "dst_port"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 53,
+            "column" : 35,
+            "source_fragment" : "hdr.tcp.dst_port"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_18"]
+            },
+            {
+              "type" : "field",
+              "value" : ["tcp", "src_port"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 53,
+            "column" : 53,
+            "source_fragment" : "hdr.tcp.src_port"
+          }
+        },
+        {
+          "op" : "modify_field_with_hash_based_offset",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "registers_ingress_flow_hash_0"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0000"
+            },
+            {
+              "type" : "calculation",
+              "value" : "calc_0"
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x03ff"
+            }
+          ],
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 50,
+            "column" : 12,
+            "source_fragment" : "hash(flow_hash_2, HashAlgorithm.crc32, ..."
+          }
+        }
+      ]
+    },
+    {
+      "name" : "packet_io27",
+      "id" : 14,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -940,8 +1893,8 @@
       ]
     },
     {
-      "name" : "act_2",
-      "id" : 11,
+      "name" : "host_meter_table26",
+      "id" : 15,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -958,7 +1911,7 @@
           ],
           "source_info" : {
             "filename" : "include/defines.p4",
-            "line" : 46,
+            "line" : 47,
             "column" : 36,
             "source_fragment" : "8w0; ..."
           }
@@ -966,8 +1919,8 @@
       ]
     },
     {
-      "name" : "act_3",
-      "id" : 12,
+      "name" : "host_meter_table48",
+      "id" : 16,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -988,8 +1941,8 @@
       ]
     },
     {
-      "name" : "act_4",
-      "id" : 13,
+      "name" : "port_meters43",
+      "id" : 17,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1010,8 +1963,8 @@
       ]
     },
     {
-      "name" : "act_5",
-      "id" : 14,
+      "name" : "port_counters39",
+      "id" : 18,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1019,7 +1972,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_1"]
+              "value" : ["scalars", "tmp_19"]
             },
             {
               "type" : "expression",
@@ -1055,7 +2008,7 @@
             },
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_1"]
+              "value" : ["scalars", "tmp_19"]
             }
           ],
           "source_info" : {
@@ -1070,7 +2023,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_2"]
+              "value" : ["scalars", "tmp_20"]
             },
             {
               "type" : "expression",
@@ -1106,7 +2059,7 @@
             },
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_2"]
+              "value" : ["scalars", "tmp_20"]
             },
             {
               "type" : "field",
@@ -1123,8 +2076,8 @@
       ]
     },
     {
-      "name" : "act_6",
-      "id" : 15,
+      "name" : "packet_io38",
+      "id" : 19,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -1170,14 +2123,14 @@
       "id" : 0,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 37,
+        "line" : 38,
         "column" : 8,
         "source_fragment" : "ingress"
       },
-      "init_table" : "tbl_act",
+      "init_table" : "tbl_port_counters29",
       "tables" : [
         {
-          "name" : "tbl_act",
+          "name" : "tbl_port_counters29",
           "id" : 0,
           "source_info" : {
             "filename" : "include/port_counters.p4",
@@ -1193,10 +2146,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [9],
-          "actions" : ["act_0"],
+          "actions" : ["port_counters29"],
           "base_default_next" : "node_3",
           "next_tables" : {
-            "act_0" : "node_3"
+            "port_counters29" : "node_3"
           },
           "default_entry" : {
             "action_id" : 9,
@@ -1206,7 +2159,7 @@
           }
         },
         {
-          "name" : "tbl_act_0",
+          "name" : "tbl_port_meters29",
           "id" : 1,
           "source_info" : {
             "filename" : "include/port_meters.p4",
@@ -1222,10 +2175,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [8],
-          "actions" : ["act"],
+          "actions" : ["port_meters29"],
           "base_default_next" : "node_5",
           "next_tables" : {
-            "act" : "node_5"
+            "port_meters29" : "node_5"
           },
           "default_entry" : {
             "action_id" : 8,
@@ -1235,8 +2188,124 @@
           }
         },
         {
-          "name" : "tbl_act_1",
+          "name" : "tbl_registers37",
           "id" : 2,
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 37,
+            "column" : 12,
+            "source_fragment" : "c.write(0, (bit<32>)hdr.ids.cnt_n); ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [10],
+          "actions" : ["registers37"],
+          "base_default_next" : "node_7",
+          "next_tables" : {
+            "registers37" : "node_7"
+          },
+          "default_entry" : {
+            "action_id" : 10,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_registers44",
+          "id" : 3,
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 44,
+            "column" : 12,
+            "source_fragment" : "hash(flow_hash_1, HashAlgorithm.crc32, ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [13],
+          "actions" : ["registers44"],
+          "base_default_next" : "node_9",
+          "next_tables" : {
+            "registers44" : "node_9"
+          },
+          "default_entry" : {
+            "action_id" : 13,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_registers62",
+          "id" : 4,
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 62,
+            "column" : 16,
+            "source_fragment" : "pc.write(reg_index_common, (bit<32>)0x1); ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [11],
+          "actions" : ["registers62"],
+          "base_default_next" : "node_12",
+          "next_tables" : {
+            "registers62" : "node_12"
+          },
+          "default_entry" : {
+            "action_id" : 11,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_registers70",
+          "id" : 5,
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 70,
+            "column" : 16,
+            "source_fragment" : "pc.read(p_count, reg_index_common); ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [12],
+          "actions" : ["registers70"],
+          "base_default_next" : "node_12",
+          "next_tables" : {
+            "registers70" : "node_12"
+          },
+          "default_entry" : {
+            "action_id" : 12,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_packet_io27",
+          "id" : 6,
           "source_info" : {
             "filename" : "include/packet_io.p4",
             "line" : 27,
@@ -1250,14 +2319,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [10],
-          "actions" : ["act_1"],
+          "action_ids" : [14],
+          "actions" : ["packet_io27"],
           "base_default_next" : "ingress.table0_control.table0",
           "next_tables" : {
-            "act_1" : "ingress.table0_control.table0"
+            "packet_io27" : "ingress.table0_control.table0"
           },
           "default_entry" : {
-            "action_id" : 10,
+            "action_id" : 14,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -1265,7 +2334,7 @@
         },
         {
           "name" : "ingress.table0_control.table0",
-          "id" : 3,
+          "id" : 7,
           "source_info" : {
             "filename" : "include/table0.p4",
             "line" : 45,
@@ -1318,13 +2387,13 @@
             {
               "match_type" : "ternary",
               "name" : "local_metadata.l4_src_port",
-              "target" : ["scalars", "local_metadata_t.l4_src_port"],
+              "target" : ["scalars", "userMetadata.l4_src_port"],
               "mask" : null
             },
             {
               "match_type" : "ternary",
               "name" : "local_metadata.l4_dst_port",
-              "target" : ["scalars", "local_metadata_t.l4_dst_port"],
+              "target" : ["scalars", "userMetadata.l4_dst_port"],
               "mask" : null
             }
           ],
@@ -1336,12 +2405,12 @@
           "direct_meters" : null,
           "action_ids" : [4, 3, 2, 5],
           "actions" : ["ingress.table0_control.set_egress_port", "ingress.table0_control.send_to_cpu", "ingress.table0_control.set_next_hop_id", "ingress.table0_control.drop"],
-          "base_default_next" : "tbl_act_2",
+          "base_default_next" : "tbl_host_meter_table26",
           "next_tables" : {
-            "ingress.table0_control.set_egress_port" : "tbl_act_2",
-            "ingress.table0_control.send_to_cpu" : "tbl_act_2",
-            "ingress.table0_control.set_next_hop_id" : "tbl_act_2",
-            "ingress.table0_control.drop" : "tbl_act_2"
+            "ingress.table0_control.set_egress_port" : "tbl_host_meter_table26",
+            "ingress.table0_control.send_to_cpu" : "tbl_host_meter_table26",
+            "ingress.table0_control.set_next_hop_id" : "tbl_host_meter_table26",
+            "ingress.table0_control.drop" : "tbl_host_meter_table26"
           },
           "default_entry" : {
             "action_id" : 5,
@@ -1351,8 +2420,8 @@
           }
         },
         {
-          "name" : "tbl_act_2",
-          "id" : 4,
+          "name" : "tbl_host_meter_table26",
+          "id" : 8,
           "source_info" : {
             "filename" : "include/host_meter_table.p4",
             "line" : 26,
@@ -1366,14 +2435,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [11],
-          "actions" : ["act_2"],
+          "action_ids" : [15],
+          "actions" : ["host_meter_table26"],
           "base_default_next" : "ingress.host_meter_control.host_meter_table",
           "next_tables" : {
-            "act_2" : "ingress.host_meter_control.host_meter_table"
+            "host_meter_table26" : "ingress.host_meter_control.host_meter_table"
           },
           "default_entry" : {
-            "action_id" : 11,
+            "action_id" : 15,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -1381,7 +2450,7 @@
         },
         {
           "name" : "ingress.host_meter_control.host_meter_table",
-          "id" : 5,
+          "id" : 9,
           "source_info" : {
             "filename" : "include/host_meter_table.p4",
             "line" : 33,
@@ -1404,10 +2473,10 @@
           "direct_meters" : "ingress.host_meter_control.host_meter",
           "action_ids" : [6, 0],
           "actions" : ["ingress.host_meter_control.read_meter", "NoAction"],
-          "base_default_next" : "node_10",
+          "base_default_next" : "node_17",
           "next_tables" : {
-            "ingress.host_meter_control.read_meter" : "node_10",
-            "NoAction" : "node_10"
+            "ingress.host_meter_control.read_meter" : "node_17",
+            "NoAction" : "node_17"
           },
           "default_entry" : {
             "action_id" : 0,
@@ -1417,8 +2486,8 @@
           }
         },
         {
-          "name" : "tbl_act_3",
-          "id" : 6,
+          "name" : "tbl_host_meter_table48",
+          "id" : 10,
           "source_info" : {
             "filename" : "include/host_meter_table.p4",
             "line" : 48,
@@ -1432,14 +2501,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [12],
-          "actions" : ["act_3"],
-          "base_default_next" : "node_12",
+          "action_ids" : [16],
+          "actions" : ["host_meter_table48"],
+          "base_default_next" : "node_19",
           "next_tables" : {
-            "act_3" : "node_12"
+            "host_meter_table48" : "node_19"
           },
           "default_entry" : {
-            "action_id" : 12,
+            "action_id" : 16,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -1447,7 +2516,7 @@
         },
         {
           "name" : "ingress.wcmp_control.wcmp_table",
-          "id" : 7,
+          "id" : 11,
           "source_info" : {
             "filename" : "include/wcmp.p4",
             "line" : 34,
@@ -1458,7 +2527,7 @@
             {
               "match_type" : "exact",
               "name" : "local_metadata.next_hop_id",
-              "target" : ["scalars", "local_metadata_t.next_hop_id"],
+              "target" : ["scalars", "userMetadata.next_hop_id"],
               "mask" : null
             }
           ],
@@ -1506,11 +2575,11 @@
               },
               {
                 "type" : "field",
-                "value" : ["scalars", "local_metadata_t.l4_src_port"]
+                "value" : ["scalars", "userMetadata.l4_src_port"]
               },
               {
                 "type" : "field",
-                "value" : ["scalars", "local_metadata_t.l4_dst_port"]
+                "value" : ["scalars", "userMetadata.l4_dst_port"]
               }
             ]
           }
@@ -1540,12 +2609,124 @@
               }
             }
           },
-          "true_next" : "tbl_act_0",
+          "true_next" : "tbl_port_meters29",
           "false_next" : "node_5"
         },
         {
           "name" : "node_5",
           "id" : 1,
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 36,
+            "column" : 11,
+            "source_fragment" : "hdr.ids.isValid() && hdr.ids.type == 0x1"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "and",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "d2b",
+                  "left" : null,
+                  "right" : {
+                    "type" : "field",
+                    "value" : ["ids", "$valid$"]
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "==",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["ids", "type"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x01"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_registers37",
+          "false_next" : "node_7"
+        },
+        {
+          "name" : "node_7",
+          "id" : 2,
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 42,
+            "column" : 12,
+            "source_fragment" : "hdr.ipv4.isValid() && hdr.ipv4.protocol == 0x6"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "and",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "d2b",
+                  "left" : null,
+                  "right" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "$valid$"]
+                  }
+                }
+              },
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "==",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "protocol"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x06"
+                  }
+                }
+              }
+            }
+          },
+          "true_next" : "tbl_registers44",
+          "false_next" : "node_12"
+        },
+        {
+          "name" : "node_9",
+          "id" : 3,
+          "source_info" : {
+            "filename" : "include/registers.p4",
+            "line" : 60,
+            "column" : 17,
+            "source_fragment" : "hdr.tcp.ctrl == 0x002"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["tcp", "ctrl"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x02"
+              }
+            }
+          },
+          "true_next" : "tbl_registers62",
+          "false_next" : "tbl_registers70"
+        },
+        {
+          "name" : "node_12",
+          "id" : 4,
           "source_info" : {
             "filename" : "include/packet_io.p4",
             "line" : 26,
@@ -1566,12 +2747,12 @@
               }
             }
           },
-          "true_next" : "tbl_act_1",
+          "true_next" : "tbl_packet_io27",
           "false_next" : "ingress.table0_control.table0"
         },
         {
-          "name" : "node_10",
-          "id" : 2,
+          "name" : "node_17",
+          "id" : 5,
           "source_info" : {
             "filename" : "include/host_meter_table.p4",
             "line" : 47,
@@ -1592,12 +2773,12 @@
               }
             }
           },
-          "true_next" : "tbl_act_3",
-          "false_next" : "node_12"
+          "true_next" : "tbl_host_meter_table48",
+          "false_next" : "node_19"
         },
         {
-          "name" : "node_12",
-          "id" : 3,
+          "name" : "node_19",
+          "id" : 6,
           "source_info" : {
             "filename" : "include/wcmp.p4",
             "line" : 52,
@@ -1610,7 +2791,7 @@
               "op" : "!=",
               "left" : {
                 "type" : "field",
-                "value" : ["scalars", "local_metadata_t.next_hop_id"]
+                "value" : ["scalars", "userMetadata.next_hop_id"]
               },
               "right" : {
                 "type" : "hexstr",
@@ -1628,15 +2809,15 @@
       "id" : 1,
       "source_info" : {
         "filename" : "basic.p4",
-        "line" : 55,
+        "line" : 57,
         "column" : 8,
         "source_fragment" : "egress"
       },
-      "init_table" : "tbl_act_4",
+      "init_table" : "tbl_port_counters39",
       "tables" : [
         {
-          "name" : "tbl_act_4",
-          "id" : 8,
+          "name" : "tbl_port_counters39",
+          "id" : 12,
           "source_info" : {
             "filename" : "include/port_counters.p4",
             "line" : 39,
@@ -1650,22 +2831,22 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [14],
-          "actions" : ["act_5"],
-          "base_default_next" : "node_17",
+          "action_ids" : [18],
+          "actions" : ["port_counters39"],
+          "base_default_next" : "node_24",
           "next_tables" : {
-            "act_5" : "node_17"
+            "port_counters39" : "node_24"
           },
           "default_entry" : {
-            "action_id" : 14,
+            "action_id" : 18,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_act_5",
-          "id" : 9,
+          "name" : "tbl_port_meters43",
+          "id" : 13,
           "source_info" : {
             "filename" : "include/port_meters.p4",
             "line" : 43,
@@ -1679,22 +2860,22 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [13],
-          "actions" : ["act_4"],
-          "base_default_next" : "node_19",
+          "action_ids" : [17],
+          "actions" : ["port_meters43"],
+          "base_default_next" : "node_26",
           "next_tables" : {
-            "act_4" : "node_19"
+            "port_meters43" : "node_26"
           },
           "default_entry" : {
-            "action_id" : 13,
+            "action_id" : 17,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_act_6",
-          "id" : 10,
+          "name" : "tbl_packet_io38",
+          "id" : 14,
           "source_info" : {
             "filename" : "include/packet_io.p4",
             "line" : 38,
@@ -1708,14 +2889,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [15],
-          "actions" : ["act_6"],
+          "action_ids" : [19],
+          "actions" : ["packet_io38"],
           "base_default_next" : null,
           "next_tables" : {
-            "act_6" : null
+            "packet_io38" : null
           },
           "default_entry" : {
-            "action_id" : 15,
+            "action_id" : 19,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -1725,8 +2906,8 @@
       "action_profiles" : [],
       "conditionals" : [
         {
-          "name" : "node_17",
-          "id" : 4,
+          "name" : "node_24",
+          "id" : 7,
           "source_info" : {
             "filename" : "include/port_meters.p4",
             "line" : 42,
@@ -1747,12 +2928,12 @@
               }
             }
           },
-          "true_next" : "tbl_act_5",
-          "false_next" : "node_19"
+          "true_next" : "tbl_port_meters43",
+          "false_next" : "node_26"
         },
         {
-          "name" : "node_19",
-          "id" : 5,
+          "name" : "node_26",
+          "id" : 8,
           "source_info" : {
             "filename" : "include/packet_io.p4",
             "line" : 37,
@@ -1774,7 +2955,7 @@
             }
           },
           "false_next" : null,
-          "true_next" : "tbl_act_6"
+          "true_next" : "tbl_packet_io38"
         }
       ]
     }
@@ -1791,7 +2972,7 @@
       },
       "target" : ["ipv4", "hdr_checksum"],
       "type" : "generic",
-      "calculation" : "calc",
+      "calculation" : "calc_1",
       "verify" : false,
       "update" : true,
       "if_cond" : {
@@ -1835,24 +3016,12 @@
       ["standard_metadata", "egress_global_timestamp"]
     ],
     [
-      "intrinsic_metadata.lf_field_list",
-      ["standard_metadata", "lf_field_list"]
-    ],
-    [
       "intrinsic_metadata.mcast_grp",
       ["standard_metadata", "mcast_grp"]
     ],
     [
-      "intrinsic_metadata.resubmit_flag",
-      ["standard_metadata", "resubmit_flag"]
-    ],
-    [
       "intrinsic_metadata.egress_rid",
       ["standard_metadata", "egress_rid"]
-    ],
-    [
-      "intrinsic_metadata.recirculate_flag",
-      ["standard_metadata", "recirculate_flag"]
     ],
     [
       "intrinsic_metadata.priority",
@@ -1861,7 +3030,7 @@
   ],
   "program" : "basic.p4",
   "__meta__" : {
-    "version" : [2, 18],
+    "version" : [2, 23],
     "compiler" : "https://github.com/p4lang/p4c"
   }
 }

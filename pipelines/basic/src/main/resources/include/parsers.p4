@@ -41,6 +41,7 @@ parser parser_impl(packet_in packet,
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.ether_type) {
             ETH_TYPE_IPV4: parse_ipv4;
+            ETH_TYPE_IDS: parse_ids;
             default: accept;
         }
     }
@@ -52,6 +53,11 @@ parser parser_impl(packet_in packet,
             IP_PROTO_UDP: parse_udp;
             default: accept;
         }
+    }
+
+    state parse_ids {
+        packet.extract(hdr.ids);
+        transition accept;
     }
 
     state parse_tcp {
@@ -76,6 +82,7 @@ control deparser(packet_out packet, in headers_t hdr) {
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
         packet.emit(hdr.udp);
+        packet.emit(hdr.ids);
     }
 }
 

@@ -202,6 +202,7 @@ APP_MAP = {
     "//apps/flowanalyzer:onos-apps-flowanalyzer-oar": [],
     "//apps/flowspec-api:onos-apps-flowspec-api-oar": [],
     "//apps/fwd:onos-apps-fwd-oar": [],
+    "//apps/ids:onos-apps-ids-oar": [],
     "//apps/gangliametrics:onos-apps-gangliametrics-oar": [],
     "//apps/graphitemetrics:onos-apps-graphitemetrics-oar": [],
     "//apps/imr:onos-apps-imr-oar": [],
