@@ -124,7 +124,7 @@ class ONOSHost(Host):
 
 class ONOSBmv2Switch(Switch):
     """BMv2 software switch with gRPC server"""
-    # Shared value used to notify to all instances of this class that a Mininet
+    # Shared value used to notify to all instances of this class that a MininetaddHost
     # exception occurred. Mininet exception handling doesn't call the stop()
     # method, so the mn process would hang after clean-up since Bmv2 would still
     # be running.
@@ -132,7 +132,7 @@ class ONOSBmv2Switch(Switch):
 
     def __init__(self, name, json=None, debugger=False, loglevel="warn",
                  elogger=False, grpcport=None, cpuport=255, notifications=False,
-                 thriftport=None, netcfg=True, dryrun=False,
+                 thriftport=9090, netcfg=True, dryrun=False,
                  pipeconf=DEFAULT_PIPECONF, pktdump=False, valgrind=False,
                  gnmi=False, portcfg=True, onosdevid=None, stratum=False,
                  **kwargs):

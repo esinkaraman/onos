@@ -30,5 +30,5 @@ public final class OsgiPropertyConstants {
     static final int PORT_DEFAULT = 1;
 
     static final String RESUBMIT_PERIOD = "period";
-    static final int RESUBMIT_PERIOD_DEFAULT = 30;
+    static final int RESUBMIT_PERIOD_DEFAULT = 0;
 }

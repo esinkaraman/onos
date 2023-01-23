@@ -12,12 +12,30 @@ import static org.onlab.packet.PacketUtils.checkInput;
 public class IDS  extends BasePacket {
 
     public static final short HW_TYPE_ETHERNET = 0x1742;
-    public static final short IDS_HEADER_LENGTH = 13; // bytes
+    public static final short IDS_HEADER_LENGTH = 105; // bytes
 
     protected byte type;
     protected int regIndex;
-    protected int centroidNormal;
-    protected int centroidAbNormal;
+    protected int centroidNormalBytes;
+    protected int centroidNormalPackets;
+    protected int centroidAbNormalBytes;
+    protected int centroidAbNormalPackets;
+
+    protected int redundant1 = 0;
+    protected long redundant2 = 0;
+    protected int redundant3 = 0;
+    protected long redundant4 = 0;
+    protected long redundant5 = 0;
+    protected int redundant6 = 0;
+    protected long redundant7 = 0;
+    protected int redundant8 = 0;
+    protected long redundant9 = 0;
+    protected long redundant10 = 0;
+
+    protected int srcAddress = 0;
+    protected int dstAddress = 0;
+    protected short srcPort = 0;
+    protected short dstPort = 0;
 
     public enum IdsType {
         INIT((byte)1), RESUBMIT((byte)2);
@@ -51,21 +69,39 @@ public class IDS  extends BasePacket {
         return this;
     }
 
-    public int getCentroidNormal() {
-        return centroidNormal;
+    public int getCentroidNormalBytes() {
+        return centroidNormalBytes;
     }
 
-    public IDS setCentroidNormal(final int centroidNormal) {
-        this.centroidNormal = centroidNormal;
+    public IDS setCentroidNormalBytes(final int centroidNormalBytes) {
+        this.centroidNormalBytes = centroidNormalBytes;
         return this;
     }
 
-    public int getCentroidAbNormal() {
-        return centroidAbNormal;
+    public int getCentroidAbNormalBytes() {
+        return centroidAbNormalBytes;
     }
 
-    public IDS setCentroidAbNormal(final int centroidAbNormal) {
-        this.centroidAbNormal = centroidAbNormal;
+    public IDS setCentroidAbNormalBytes(final int centroidAbNormalBytes) {
+        this.centroidAbNormalBytes = centroidAbNormalBytes;
+        return this;
+    }
+
+    public int getCentroidNormalPackets() {
+        return centroidNormalPackets;
+    }
+
+    public IDS setCentroidNormalPackets(int centroidNormalPackets) {
+        this.centroidNormalPackets = centroidNormalPackets;
+        return this;
+    }
+
+    public int getCentroidAbNormalPackets() {
+        return centroidAbNormalPackets;
+    }
+
+    public IDS setCentroidAbNormalPackets(int centroidAbNormalPackets) {
+        this.centroidAbNormalPackets = centroidAbNormalPackets;
         return this;
     }
 
@@ -77,10 +113,30 @@ public class IDS  extends BasePacket {
         bb.put(type);
         //put ids index as zero
         bb.putInt(regIndex);
-        //put centroid normal
-        bb.putInt(centroidNormal);
-        //put centroid abnormal
-        bb.putInt(centroidAbNormal);
+        //put centroid normal for packet amount
+        bb.putInt(centroidNormalBytes);
+        //put centroid normal for packet bytes
+        bb.putInt(centroidNormalPackets);
+        //put centroid abnormal for packet amount
+        bb.putInt(centroidAbNormalBytes);
+        //put centroid abnormal for packet bytes
+        bb.putInt(centroidAbNormalPackets);
+        //put redundant fields
+        bb.putInt(redundant1);
+        bb.putLong(redundant2);
+        bb.putInt(redundant3);
+        bb.putLong(redundant4);
+        bb.putLong(redundant5);
+        bb.putInt(redundant6);
+        bb.putLong(redundant7);
+        bb.putInt(redundant8);
+        bb.putLong(redundant9);
+        bb.putLong(redundant10);
+
+        bb.putInt(srcAddress);
+        bb.putInt(dstAddress);
+        bb.putShort(srcPort);
+        bb.putShort(dstPort);
         return data;
     }
 
@@ -92,8 +148,10 @@ public class IDS  extends BasePacket {
             final ByteBuffer bb = ByteBuffer.wrap(data, offset, length);
             ids.setType(bb.get());
             ids.setRegIndex(bb.getInt());
-            ids.setCentroidNormal(bb.getInt());
-            ids.setCentroidAbNormal(bb.getInt());
+            ids.setCentroidNormalBytes(bb.getInt());
+            ids.setCentroidNormalPackets(bb.getInt());
+            ids.setCentroidAbNormalBytes(bb.getInt());
+            ids.setCentroidAbNormalPackets(bb.getInt());
             return ids;
         };
     }
@@ -112,13 +170,16 @@ public class IDS  extends BasePacket {
         IDS ids = (IDS) o;
         return getType() == ids.getType() &&
                 getRegIndex() == ids.getRegIndex() &&
-                getCentroidNormal() == ids.getCentroidNormal() &&
-                getCentroidAbNormal() == ids.getCentroidAbNormal();
+                getCentroidNormalBytes() == ids.getCentroidNormalBytes() &&
+                getCentroidNormalPackets() == ids.getCentroidNormalPackets() &&
+                getCentroidAbNormalBytes() == ids.getCentroidAbNormalBytes() &&
+                getCentroidAbNormalPackets() == ids.getCentroidAbNormalPackets();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(super.hashCode(), getType(), getRegIndex(), getCentroidNormal(), getCentroidAbNormal());
+        return Objects.hashCode(super.hashCode(), getType(), getRegIndex(), getCentroidNormalBytes(), getCentroidNormalPackets(),
+                                getCentroidAbNormalBytes(), getCentroidAbNormalPackets());
     }
 
     @Override
@@ -126,8 +187,10 @@ public class IDS  extends BasePacket {
         return MoreObjects.toStringHelper(this)
                 .add("type", Byte.toString(type))
                 .add("regIndex", Integer.toString(regIndex))
-                .add("centroidNormal", Integer.toString(centroidNormal))
-                .add("centroidAbNormal", Integer.toString(centroidAbNormal))
+                .add("centroidNormal", Integer.toString(centroidNormalBytes))
+                .add("centroidNormalBytes", Integer.toString(centroidNormalPackets))
+                .add("centroidAbNormal", Integer.toString(centroidAbNormalBytes))
+                .add("centroidAbNormalBytes", Integer.toString(centroidAbNormalPackets))
                 .toString();
     }
 }

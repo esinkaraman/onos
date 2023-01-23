@@ -27,6 +27,7 @@ parser parser_impl(packet_in packet,
 
     state start {
         transition select(standard_metadata.ingress_port) {
+	    IDS_RESUBMIT_PORT: parse_packet_out;
             CPU_PORT: parse_packet_out;
             default: parse_ethernet;
         }
@@ -41,13 +42,14 @@ parser parser_impl(packet_in packet,
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.ether_type) {
             ETH_TYPE_IPV4: parse_ipv4;
-            ETH_TYPE_IDS: parse_ids;
+	    ETH_TYPE_IDS: parse_ids;
             default: accept;
         }
     }
 
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
+	local_metadata.tcp_length = hdr.ipv4.len - 16w20;
         transition select(hdr.ipv4.protocol) {
             IP_PROTO_TCP: parse_tcp;
             IP_PROTO_UDP: parse_udp;
@@ -57,6 +59,7 @@ parser parser_impl(packet_in packet,
 
     state parse_ids {
         packet.extract(hdr.ids);
+	local_metadata.reg_index = hdr.ids.reg_index;
         transition accept;
     }
 
@@ -82,7 +85,7 @@ control deparser(packet_out packet, in headers_t hdr) {
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
         packet.emit(hdr.udp);
-        packet.emit(hdr.ids);
+	packet.emit(hdr.ids);
     }
 }
 

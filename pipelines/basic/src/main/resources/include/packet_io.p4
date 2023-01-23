@@ -22,6 +22,8 @@
 
 control packetio_ingress(inout headers_t hdr,
                          inout standard_metadata_t standard_metadata) {
+
+
     apply {
         if (standard_metadata.ingress_port == CPU_PORT) {
             standard_metadata.egress_spec = hdr.packet_out.egress_port;
@@ -32,12 +34,31 @@ control packetio_ingress(inout headers_t hdr,
 }
 
 control packetio_egress(inout headers_t hdr,
+			inout local_metadata_t local_metadata,
                         inout standard_metadata_t standard_metadata) {
     apply {
         if (standard_metadata.egress_port == CPU_PORT) {
             hdr.packet_in.setValid();
             hdr.packet_in.ingress_port = standard_metadata.ingress_port;
         }
+	if (local_metadata.report == _TRUE) {
+           hdr.ids.reg_index = 	local_metadata.reg_index;
+	   hdr.ids.r1 = local_metadata.r1;
+	   hdr.ids.r2 = local_metadata.r2;
+	   hdr.ids.r3 = local_metadata.r3;
+	   hdr.ids.r4 = local_metadata.r4;
+	   hdr.ids.r5 = local_metadata.r5;
+	   hdr.ids.r6 = local_metadata.r6;
+	   hdr.ids.r7 = local_metadata.r7;
+	   hdr.ids.r8 = local_metadata.r8;
+	   hdr.ids.r9 = local_metadata.r9;
+	   hdr.ids.r10 = local_metadata.r10;
+	   
+	   hdr.ids.src_address = local_metadata.src_address;
+           hdr.ids.dst_address = local_metadata.dst_address;
+           hdr.ids.src_port = local_metadata.src_port;
+           hdr.ids.dst_port = local_metadata.dst_port;           
+	}
     }
 }
 

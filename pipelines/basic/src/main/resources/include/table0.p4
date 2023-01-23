@@ -38,26 +38,33 @@ control table0_control(inout headers_t hdr,
         standard_metadata.egress_spec = port;
     }
 
+    //for testing only
+    action send_back() {
+        standard_metadata.egress_spec = standard_metadata.ingress_port;
+    }
+
+
     action drop() {
         mark_to_drop(standard_metadata);
     }
 
     table table0 {
         key = {
-            standard_metadata.ingress_port : ternary;
-            hdr.ethernet.src_addr          : ternary;
+            standard_metadata.ingress_port : exact;
+            /*hdr.ethernet.src_addr          : ternary;
             hdr.ethernet.dst_addr          : ternary;
             hdr.ethernet.ether_type        : ternary;
             hdr.ipv4.src_addr              : ternary;
             hdr.ipv4.dst_addr              : ternary;
             hdr.ipv4.protocol              : ternary;
             local_metadata.l4_src_port     : ternary;
-            local_metadata.l4_dst_port     : ternary;
+            local_metadata.l4_dst_port     : ternary;*/
         }
         actions = {
             set_egress_port;
             send_to_cpu;
             set_next_hop_id;
+	    send_back;
             drop;
         }
         const default_action = drop();

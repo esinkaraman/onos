@@ -42,11 +42,18 @@ control ingress(inout headers_t hdr,
     apply {
         port_counters_ingress.apply(hdr, standard_metadata);
         port_meters_ingress.apply(hdr, standard_metadata);
-        registers_ingress.apply(hdr, standard_metadata);
+	registers_ingress.apply(hdr, local_metadata, standard_metadata);
         packetio_ingress.apply(hdr, standard_metadata);
         table0_control.apply(hdr, local_metadata, standard_metadata);
         host_meter_control.apply(hdr, local_metadata, standard_metadata);
         wcmp_control.apply(hdr, local_metadata, standard_metadata);
+
+	if (local_metadata.report == _TRUE) {
+           clone_preserving_field_list(CloneType.I2E, REPORT_MIRROR_SESSION_ID, RESUB_FL_1);	
+	}
+	if (local_metadata.hash_collusion == _TRUE) {
+           clone_preserving_field_list(CloneType.I2E, REPORT_MIRROR_SESSION_ID_2, RESUB_FL_1);	
+	}
      }
 }
 
@@ -61,7 +68,7 @@ control egress(inout headers_t hdr,
     apply {
         port_counters_egress.apply(hdr, standard_metadata);
         port_meters_egress.apply(hdr, standard_metadata);
-        packetio_egress.apply(hdr, standard_metadata);
+        packetio_egress.apply(hdr, local_metadata, standard_metadata);
     }
 }
 
@@ -75,3 +82,4 @@ V1Switch(parser_impl(),
          egress(),
          compute_checksum_control(),
          deparser()) main;
+

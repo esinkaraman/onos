@@ -42,6 +42,10 @@ typedef bit<9>  port_t;
 typedef bit<16> next_hop_id_t;
 
 const port_t CPU_PORT = 255;
+const port_t IDS_RESUBMIT_PORT = 0;
+
+const bit<32> REPORT_MIRROR_SESSION_ID = 500;
+const bit<32> REPORT_MIRROR_SESSION_ID_2 = 502;
 
 typedef bit<8> MeterColor;
 const MeterColor MeterColor_GREEN = 8w0;

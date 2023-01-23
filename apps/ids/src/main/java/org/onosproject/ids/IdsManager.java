@@ -55,6 +55,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 )
 public class IdsManager {
 
+    public static final int NORMAL_BYTES = 31258;
+    public static final int NORMAL_PACKETS = 59;
+    public static final int ABNORMAL_BYTES = 8057992;
+    public static final int ABNORMAL_PACKETS = 6914;
+
     private final Logger log = getLogger(getClass());
 
     private ApplicationId appId;
@@ -207,8 +212,10 @@ public class IdsManager {
         ids.setParent(ethernet);
         ids.setType(IDS.IdsType.INIT.getValue());
         ids.setRegIndex(0);
-        ids.setCentroidNormal(1234);
-        ids.setCentroidAbNormal(567890);
+        ids.setCentroidNormalBytes(NORMAL_BYTES);
+        ids.setCentroidNormalPackets(NORMAL_PACKETS);
+        ids.setCentroidAbNormalBytes(ABNORMAL_BYTES);
+        ids.setCentroidAbNormalPackets(ABNORMAL_PACKETS);
         ethernet.setPayload(ids);
 
         return ethernet;
@@ -225,8 +232,10 @@ public class IdsManager {
         ids.setParent(ethernet);
         ids.setType(IDS.IdsType.RESUBMIT.getValue());
         ids.setRegIndex(0);
-        ids.setCentroidNormal(0);
-        ids.setCentroidAbNormal(0);
+        ids.setCentroidNormalBytes(0);
+        ids.setCentroidNormalPackets(0);
+        ids.setCentroidAbNormalBytes(0);
+        ids.setCentroidAbNormalPackets(0);
         ethernet.setPayload(ids);
 
         return ethernet;
@@ -268,6 +277,9 @@ public class IdsManager {
     private class ResubmitTask extends TimerTask {
         @Override
         public void run() {
+            if (period == 0) {
+                return;
+            }
             log.debug("resubmit task is awake");
             //check device counters
             for (DeviceId deviceId:resubmitStatusMap.keySet()) {

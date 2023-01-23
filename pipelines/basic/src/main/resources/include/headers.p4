@@ -58,8 +58,24 @@ const bit<8> IPV4_MIN_HEAD_LEN = 20;
 header ids_t {
     bit<8>  type;
     bit<32> reg_index;
-    bit<32> cnt_n;
-    bit<32> cnt_abn;
+    bit<32> cnt_n_bytes;
+    bit<32> cnt_n_packets;
+    bit<32> cnt_abn_bytes;
+    bit<32> cnt_abn_packets;
+    bit<32> r1;
+    bit<64> r2;
+    bit<32> r3;
+    bit<64> r4;
+    bit<64> r5;
+    bit<32> r6;
+    bit<64> r7;
+    bit<32> r8;
+    bit<64> r9;
+    bit<64> r10;
+    bit<32> src_address;
+    bit<32> dst_address;
+    bit<16> src_port;
+    bit<16> dst_port;
 }
 
 header tcp_t {
